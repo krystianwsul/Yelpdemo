@@ -18,10 +18,15 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.yelp.fusion.client.connection.YelpFusionApi;
 import com.yelp.fusion.client.connection.YelpFusionApiFactory;
+import com.yelp.fusion.client.models.SearchResponse;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -33,10 +38,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Nullable
     private AsyncTask<Void, Void, Void> mAsyncTask;
 
+    private Handler mHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        mHandler = new Handler();
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -70,6 +80,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (mAsyncTask != null)
             mAsyncTask.cancel(true);
+
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     private static Pair<Double, Double> midPoint(double lat1, double lng1, double lat2, double lng2) {
@@ -106,9 +118,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
+        LatLng sydney = new LatLng(-33.93544992896953, 151.0491035574696);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -127,28 +140,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mMap == null)
             return;
 
-        LatLngBounds latLngBounds = mMap.getProjection()
-                .getVisibleRegion()
-                .latLngBounds;
+        mHandler.removeCallbacksAndMessages(null);
 
-        Pair<Double, Double> center = midPoint(latLngBounds.southwest.latitude,
-                latLngBounds.southwest.longitude,
-                latLngBounds.northeast.latitude,
-                latLngBounds.northeast.longitude);
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                LatLngBounds latLngBounds = mMap.getProjection()
+                        .getVisibleRegion()
+                        .latLngBounds;
 
-        Log.e("asdf", center.first + ", " + center.second);
+                Pair<Double, Double> center = midPoint(latLngBounds.southwest.latitude,
+                        latLngBounds.southwest.longitude,
+                        latLngBounds.northeast.latitude,
+                        latLngBounds.northeast.longitude);
 
-        double radius = distance(latLngBounds.southwest.latitude, center.first,
-                latLngBounds.southwest.longitude, center.second);
+                Double longitude = center.second;
+                if (longitude > 180)
+                    longitude = 360 - longitude;
 
-        Log.e("asdf", "radius: " + radius);
+                Log.e("asdf", "center: " + center.first + ", " + longitude);
 
-        Map<String, String> params = new HashMap<>();
-        params.put("term", "restaurants");
-        params.put("latitude", center.first.toString());
-        params.put("longitude", center.second.toString());
-        params.put("radius", center.second.toString());
+                double radius = distance(latLngBounds.southwest.latitude, center.first,
+                        latLngBounds.southwest.longitude, center.second);
 
-        //mYelpFusionApi.getBusinessSearch(params);
+                radius = Math.min(radius, 40000);
+
+                Map<String, String> params = new HashMap<>();
+                params.put("categories", "restaurants");
+                params.put("latitude", center.first.toString());
+                params.put("longitude", longitude.toString());
+                params.put("radius", Long.valueOf(Math.round(radius)).toString());
+
+                mYelpFusionApi.getBusinessSearch(params).enqueue(new Callback<SearchResponse>() {
+                    @Override
+                    public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
+                        Log.e("asdf", "response: " + response.body());
+                    }
+
+                    @Override
+                    public void onFailure(Call<SearchResponse> call, Throwable t) {
+                        Log.e("asdf", "onFailure", t);
+                    }
+                });
+            }
+        }, 1000);
     }
 }
