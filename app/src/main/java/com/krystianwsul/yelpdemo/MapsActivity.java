@@ -18,17 +18,23 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.yelp.fusion.client.connection.YelpFusionApi;
 import com.yelp.fusion.client.connection.YelpFusionApiFactory;
+import com.yelp.fusion.client.models.Business;
 import com.yelp.fusion.client.models.SearchResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+
+    private static final String SHOWN_BUSINESSES_KEY = "shownBusinesses";
 
     private GoogleMap mMap;
 
@@ -40,12 +46,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Handler mHandler;
 
+    private Set<String> mShownBusinesses;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
         mHandler = new Handler();
+
+        if (savedInstanceState != null) {
+            //noinspection ConstantConditions
+            mShownBusinesses = new HashSet<>(savedInstanceState.getStringArrayList(SHOWN_BUSINESSES_KEY));
+        } else {
+            mShownBusinesses = new HashSet<>();
+        }
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -72,6 +87,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
 
         mAsyncTask.execute();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putStringArrayList(SHOWN_BUSINESSES_KEY, new ArrayList<>(mShownBusinesses));
     }
 
     @Override
@@ -119,7 +139,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-33.93544992896953, 151.0491035574696);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
 
@@ -174,6 +193,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mYelpFusionApi.getBusinessSearch(params).enqueue(new Callback<SearchResponse>() {
                     @Override
                     public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
+                        for (Business business : response.body().getBusinesses()) {
+                            if (mShownBusinesses.contains(business.getId()))
+                                return;
+
+                            mShownBusinesses.add(business.getId());
+
+                            LatLng latLng = new LatLng(business.getCoordinates().getLatitude(), business.getCoordinates().getLongitude());
+                            mMap.addMarker(new MarkerOptions().position(latLng).title(business.getName()));
+                        }
+
                         Log.e("asdf", "response: " + response.body());
                     }
 
@@ -183,6 +212,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 });
             }
-        }, 1000);
+        }, 100);
     }
 }
