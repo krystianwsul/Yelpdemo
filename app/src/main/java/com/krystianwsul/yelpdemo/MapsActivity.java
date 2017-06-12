@@ -1,6 +1,7 @@
 package com.krystianwsul.yelpdemo;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.annotation.ArrayRes;
@@ -165,6 +166,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 infoViewAddress.setText(TextUtils.join("\n", address));
 
                 return view;
+            }
+        });
+
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                startActivity(RestaurantActivity.newIntent(MapsActivity.this));
             }
         });
 
