@@ -1,20 +1,27 @@
 package com.krystianwsul.yelpdemo;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.support.annotation.ArrayRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.util.Pair;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.TextureView;
+import android.view.View;
+import android.widget.RatingBar;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.yelp.fusion.client.connection.YelpFusionApi;
 import com.yelp.fusion.client.connection.YelpFusionApiFactory;
@@ -24,17 +31,14 @@ import com.yelp.fusion.client.models.SearchResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-
-    private static final String SHOWN_BUSINESSES_KEY = "shownBusinesses";
 
     private GoogleMap mMap;
 
@@ -46,7 +50,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Handler mHandler;
 
-    private Set<String> mShownBusinesses;
+    private static Map<String, Business> sShownBusinesses = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,13 +58,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         mHandler = new Handler();
-
-        if (savedInstanceState != null) {
-            //noinspection ConstantConditions
-            mShownBusinesses = new HashSet<>(savedInstanceState.getStringArrayList(SHOWN_BUSINESSES_KEY));
-        } else {
-            mShownBusinesses = new HashSet<>();
-        }
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -87,11 +84,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
 
         mAsyncTask.execute();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putStringArrayList(SHOWN_BUSINESSES_KEY, new ArrayList<>(mShownBusinesses));
     }
 
     @Override
@@ -141,6 +133,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(-33.93544992896953, 151.0491035574696);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
+
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                @SuppressLint("InflateParams")
+                View view = getLayoutInflater().inflate(R.layout.info_view, null);
+
+                Business business = sShownBusinesses.get(marker.getTitle());
+
+                TextView infoViewTitle = (TextView) view.findViewById(R.id.info_view_title);
+                infoViewTitle.setText(business.getName());
+
+                RatingBar infoViewRating = (RatingBar) view.findViewById(R.id.info_view_rating);
+                infoViewRating.setRating((float) business.getRating());
+
+                List<String> address = new ArrayList<>();
+                if (!TextUtils.isEmpty(business.getLocation().getAddress1()))
+                    address.add(business.getLocation().getAddress1());
+                if (!TextUtils.isEmpty(business.getLocation().getAddress2()))
+                    address.add(business.getLocation().getAddress2());
+                if (!TextUtils.isEmpty(business.getLocation().getAddress3()))
+                    address.add(business.getLocation().getAddress3());
+
+                TextView infoViewAddress = (TextView) view.findViewById(R.id.info_view_address);
+                infoViewAddress.setText(TextUtils.join("\n", address));
+
+                return view;
+            }
+        });
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -194,13 +220,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
                         for (Business business : response.body().getBusinesses()) {
-                            if (mShownBusinesses.contains(business.getId()))
+                            if (sShownBusinesses.containsKey(business.getId()))
                                 return;
 
-                            mShownBusinesses.add(business.getId());
+                            sShownBusinesses.put(business.getId(), business);
 
                             LatLng latLng = new LatLng(business.getCoordinates().getLatitude(), business.getCoordinates().getLongitude());
-                            mMap.addMarker(new MarkerOptions().position(latLng).title(business.getName()));
+                            mMap.addMarker(new MarkerOptions()
+                                    .position(latLng)
+                                    .title(business.getId()));
                         }
 
                         Log.e("asdf", "response: " + response.body());
