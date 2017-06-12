@@ -42,6 +42,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
+    <!--
     <ScrollView
         android:id="@+id/show_group_recycler"
         android:layout_width="match_parent"
@@ -57,5 +58,6 @@
         </LinearLayout>
 
     </ScrollView>
+    -->
 
 </android.support.design.widget.CoordinatorLayout>

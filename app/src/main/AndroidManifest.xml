@@ -38,7 +38,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".RestaurantActivity">
+        <activity android:name=".RestaurantActivity"
+                  android:theme="@style/AppTheme.DrawSystemTray">
         </activity>
     </application>
 
