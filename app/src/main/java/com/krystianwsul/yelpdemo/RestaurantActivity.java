@@ -34,17 +34,19 @@ public class RestaurantActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.restaurant_toolbar);
         setSupportActionBar(toolbar);
 
-        Business business = MapsActivity.sShownBusinesses.get(id);
+        //Business business = MapsActivity.sShownBusinesses.get(id);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(business.getName());
+        //actionBar.setTitle(business.getName());
 
         ImageView restaurantImage = (ImageView) findViewById(R.id.restaurant_image);
 
-        Log.e("asdf", "url: " + business.getImageUrl());
+        //Log.e("asdf", "url: " + business.getImageUrl());
 
+        /*
         Glide.with(this)
                 .load(business.getImageUrl())
                 .into(restaurantImage);
+                */
     }
 }
