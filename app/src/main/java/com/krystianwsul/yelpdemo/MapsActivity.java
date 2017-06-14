@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -132,20 +133,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onResponse(@NonNull Map<String, Business> businesses) {
-        Stream<Business> newBusinesses = Stream.of(businesses.entrySet())
+        List<Business> newBusinesses = Stream.of(businesses.entrySet())
                 .filter(entry -> !mBusinesses.containsKey(entry.getKey()))
-                .map(Map.Entry::getValue);
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
 
-        Log.e("asdf", newBusinesses.count() + " new results");
+        Log.e("asdf", newBusinesses.size() + " new results");
 
         mBusinesses.putAll(businesses);
 
-        newBusinesses.forEach(business -> {
+        for (Business business : newBusinesses) {
             LatLng latLng = new LatLng(business.getCoordinates().getLatitude(), business.getCoordinates().getLongitude());
             mMap.addMarker(new MarkerOptions()
                     .position(latLng)
                     .title(business.getId()));
-        });
+        }
     }
 
     @Override
