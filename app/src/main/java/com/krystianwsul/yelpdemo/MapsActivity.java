@@ -59,8 +59,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        YelpViewModel.getInstance(); // to poke the constructor
     }
 
     @Override
@@ -118,13 +116,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .getVisibleRegion()
                     .latLngBounds);
 
-            YelpViewModel.getInstance().setListener(this, null); // set with reasonable coordinates
+            YelpViewModel.sInstance.setListener(this, null);
         } else {
             LatLngBounds latLngBounds = mMap.getProjection()
                     .getVisibleRegion()
                     .latLngBounds;
 
-            YelpViewModel.getInstance().setListener(this, latLngBounds);
+            YelpViewModel.sInstance.setListener(this, latLngBounds);
         }
     }
 
@@ -133,7 +131,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .getVisibleRegion()
                 .latLngBounds;
 
-        YelpViewModel.getInstance().enqueueRequest(latLngBounds);
+        YelpViewModel.sInstance.enqueueRequest(latLngBounds);
     }
 
     @Override
@@ -157,7 +155,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onDestroy() {
-        YelpViewModel.getInstance().clearListener();
+        YelpViewModel.sInstance.clearListener();
 
         super.onDestroy();
     }

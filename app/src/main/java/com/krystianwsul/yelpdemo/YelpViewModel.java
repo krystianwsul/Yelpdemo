@@ -26,15 +26,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 class YelpViewModel {
-    @Nullable
-    private static YelpViewModel sInstance;
-
-    @NonNull
-    static YelpViewModel getInstance() {
-        if (sInstance == null)
-            sInstance = new YelpViewModel();
-        return sInstance;
-    }
+    static final YelpViewModel sInstance = new YelpViewModel();
 
     @Nullable
     private YelpFusionApi mYelpFusionApi;
