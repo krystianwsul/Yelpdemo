@@ -102,7 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        mMap.setOnInfoWindowClickListener(marker -> startActivity(RestaurantActivity.newIntent(MapsActivity.this, marker.getTitle())));
+        mMap.setOnInfoWindowClickListener(marker -> startActivity(RestaurantActivity.newIntent(MapsActivity.this, mBusinesses.get(marker.getTitle()))));
 
         mMap.setOnCameraMoveListener(this::updateMap);
         mMap.setOnCameraIdleListener(this::updateMap);
