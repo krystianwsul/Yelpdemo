@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.RatingBar;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.yelp.fusion.client.models.Business;
@@ -45,11 +47,17 @@ public class RestaurantActivity extends AppCompatActivity {
         actionBar.setTitle(restaurantData.mName);
 
         ImageView restaurantImage = (ImageView) findViewById(R.id.restaurant_image);
-
-        Log.e("asdf", "url: " + restaurantData.mImageUrl);
-
         Glide.with(this)
                 .load(restaurantData.mImageUrl)
                 .into(restaurantImage);
+
+        TextView restaurantPhone = (TextView) findViewById(R.id.restaurant_phone);
+        restaurantPhone.setText(restaurantData.mPhone);
+
+        RatingBar restaurantRating = (RatingBar) findViewById(R.id.restaurant_rating);
+        restaurantRating.setRating(restaurantData.mRating);
+
+        TextView restaurantAddress = (TextView) findViewById(R.id.restaurant_address);
+        restaurantAddress.setText(restaurantData.mAddress);
     }
 }

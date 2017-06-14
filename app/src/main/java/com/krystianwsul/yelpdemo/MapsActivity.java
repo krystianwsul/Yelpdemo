@@ -87,16 +87,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 RatingBar infoViewRating = (RatingBar) view.findViewById(R.id.info_view_rating);
                 infoViewRating.setRating((float) business.getRating());
 
-                List<String> address = new ArrayList<>();
-                if (!TextUtils.isEmpty(business.getLocation().getAddress1()))
-                    address.add(business.getLocation().getAddress1());
-                if (!TextUtils.isEmpty(business.getLocation().getAddress2()))
-                    address.add(business.getLocation().getAddress2());
-                if (!TextUtils.isEmpty(business.getLocation().getAddress3()))
-                    address.add(business.getLocation().getAddress3());
-
                 TextView infoViewAddress = (TextView) view.findViewById(R.id.info_view_address);
-                infoViewAddress.setText(TextUtils.join("\n", address));
+                infoViewAddress.setText(RestaurantData.getAddress(business));
 
                 return view;
             }
