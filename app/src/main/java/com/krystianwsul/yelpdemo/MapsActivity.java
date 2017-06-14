@@ -45,7 +45,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
 
     @NonNull
-    private Map<String, Business> mBusinesses = new HashMap<>();
+    private final Map<String, Business> mBusinesses = new HashMap<>();
 
     private boolean mFirst;
 
@@ -107,11 +107,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnInfoWindowClickListener(marker -> startActivity(RestaurantActivity.newIntent(MapsActivity.this, marker.getTitle())));
 
         mMap.setOnCameraMoveListener(this::updateMap);
+        mMap.setOnCameraIdleListener(this::updateMap);
 
         if (mFirst) {
-            LatLng sydney = new LatLng(-33.93544992896953, 151.0491035574696);
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+            LatLng empireStateBuilding = new LatLng(40.748817, -73.985428);
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(empireStateBuilding));
             mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
+
+            Log.e("asdf", "initial bounds " + mMap.getProjection()
+                    .getVisibleRegion()
+                    .latLngBounds);
 
             YelpViewModel.getInstance().setListener(this, null); // set with reasonable coordinates
         } else {

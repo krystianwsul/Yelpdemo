@@ -25,12 +25,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class YelpViewModel {
+class YelpViewModel {
     @Nullable
     private static YelpViewModel sInstance;
 
     @NonNull
-    public static YelpViewModel getInstance() {
+    static YelpViewModel getInstance() {
         if (sInstance == null)
             sInstance = new YelpViewModel();
         return sInstance;
@@ -64,7 +64,7 @@ public class YelpViewModel {
             }
 
             @Override
-            protected void onPostExecute(YelpFusionApi yelpFusionApi) {
+            protected void onPostExecute(@SuppressWarnings("NullableProblems") YelpFusionApi yelpFusionApi) {
                 Assert.assertTrue(yelpFusionApi != null);
                 Assert.assertTrue(!mExecutingRequest);
                 Assert.assertTrue(mBusinesses == null);
@@ -85,7 +85,7 @@ public class YelpViewModel {
         asyncTask.execute();
     }
 
-    public void setListener(@NonNull Listener listener, @NonNull LatLngBounds latLngBounds) {
+    void setListener(@NonNull Listener listener, @Nullable LatLngBounds latLngBounds) {
         Assert.assertTrue(mListener == null); // todo remove assertions
 
         mListener = listener;
@@ -97,13 +97,15 @@ public class YelpViewModel {
 
             listener.onResponse(mBusinesses);
         } else {
-            Log.e("asdf", "onPostExecute enqueueing");
+            if (latLngBounds != null) {
+                Log.e("asdf", "onPostExecute enqueueing");
 
-            enqueueRequest(latLngBounds);
+                enqueueRequest(latLngBounds);
+            }
         }
     }
 
-    public void clearListener() {
+    void clearListener() {
         Log.e("asdf", "clearListener");
 
         mListener = null;
@@ -120,14 +122,16 @@ public class YelpViewModel {
 
             mPendingRequest = latLngBounds; // possibly overwrite
         } else {
-            Assert.assertTrue(mPendingRequest == null);
-
             if (!mExecutingRequest) {
                 Log.e("asdf", "enqueueRequest getting request");
 
+                Assert.assertTrue(mPendingRequest == null);
+
                 getRequest(latLngBounds);
             } else {
-                Log.e("asdf", "enqueueRequest already executing, ignoring");
+                Log.e("asdf", "enqueueRequest already executing, setting pending");
+
+                mPendingRequest = latLngBounds; // possibly overwrite
             }
         }
     }
@@ -178,16 +182,31 @@ public class YelpViewModel {
 
                 Log.e("asdf", "response: " + response.body());
 
-                mExecutingRequest = false;
+                onFinished();
             }
 
             @Override
             public void onFailure(Call<SearchResponse> call, Throwable t) {
                 Log.e("asdf", "onFailure", t);
 
-                mExecutingRequest = false;
+                onFinished();
             }
         });
+    }
+
+    private void onFinished() {
+        mExecutingRequest = false;
+
+        if (mPendingRequest != null) {
+            Log.e("asdf", "onFinished mPendingRequest not null, restarting");
+
+            LatLngBounds latLngBounds = mPendingRequest;
+            mPendingRequest = null;
+
+            getRequest(latLngBounds);
+        } else {
+            Log.e("asdf", "onFinished mPendingRequest null, finished");
+        }
     }
 
     private static Pair<Double, Double> midPoint(double lat1, double lng1, double lat2, double lng2) {
@@ -219,7 +238,7 @@ public class YelpViewModel {
         return R * c * 1000; // convert to meters
     }
 
-    public interface Listener {
+    interface Listener {
         void onResponse(@NonNull Map<String, Business> businesses);
     }
 }
