@@ -81,6 +81,8 @@ public class RestaurantActivity extends AppCompatActivity {
         mListener = ReviewSource.sInstance.getReview(restaurantData.mId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(reviews -> {
+                    restaurantReviews.removeAllViews();
+
                     for (Review review : reviews) {
                         View view = View.inflate(RestaurantActivity.this,
                                 R.layout.row_review, null);
