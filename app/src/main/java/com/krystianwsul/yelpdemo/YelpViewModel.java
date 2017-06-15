@@ -20,7 +20,17 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Observer;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,39 +52,45 @@ class YelpViewModel {
 
     private boolean mExecutingRequest = false;
 
-    private YelpViewModel() {
-        AsyncTask<Void, Void, YelpFusionApi> asyncTask = new AsyncTask<Void, Void, YelpFusionApi>() {
-            @Override
-            protected YelpFusionApi doInBackground(Void... params) {
+    private boolean mAlreadyInitialized = false;
+    final Single<YelpFusionApi> mApiObservable =
+            Observable.fromCallable(() -> {
+                Log.e("asdf", "creating yelpFusionApi");
+
+                Assert.assertTrue(!mAlreadyInitialized);
+
                 YelpFusionApiFactory yelpFusionApiFactory = new YelpFusionApiFactory();
 
                 try {
-                    return yelpFusionApiFactory.createAPI("Smym4waYVw0m-nFnGJpQ3g", "5KfDI2E0e5o0fvpF2NjsaypsS1cyaSMrJPQxArkYtMyQdOkqH5KExBxLshPuTVvm");
+                    YelpFusionApi yelpFusionApi = yelpFusionApiFactory.createAPI("Smym4waYVw0m-nFnGJpQ3g", "5KfDI2E0e5o0fvpF2NjsaypsS1cyaSMrJPQxArkYtMyQdOkqH5KExBxLshPuTVvm");
+                    mAlreadyInitialized = true;
+                    return yelpFusionApi;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+            })
+                    .cache()
+                    .singleOrError()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread());
+
+    private YelpViewModel() {
+        //noinspection NullableProblems
+        mApiObservable.subscribe(yelpFusionApi -> {
+            Assert.assertTrue(!mExecutingRequest);
+            Assert.assertTrue(mBusinesses == null);
+            Assert.assertTrue(mYelpFusionApi == null);
+
+            mYelpFusionApi = yelpFusionApi;
+
+            Log.e("asdf", "onPostExecute mPendingRequest " + mPendingRequest);
+            if (mPendingRequest != null) {
+                LatLngBounds latLngBounds = mPendingRequest;
+                mPendingRequest = null;
+
+                getRequest(latLngBounds);
             }
-
-            @Override
-            protected void onPostExecute(@SuppressWarnings("NullableProblems") YelpFusionApi yelpFusionApi) {
-                Assert.assertTrue(yelpFusionApi != null);
-                Assert.assertTrue(!mExecutingRequest);
-                Assert.assertTrue(mBusinesses == null);
-                Assert.assertTrue(mYelpFusionApi == null);
-
-                mYelpFusionApi = yelpFusionApi;
-
-                Log.e("asdf", "onPostExecute mPendingRequest " + mPendingRequest);
-                if (mPendingRequest != null) {
-                    LatLngBounds latLngBounds = mPendingRequest;
-                    mPendingRequest = null;
-
-                    getRequest(latLngBounds);
-                }
-            }
-        };
-
-        asyncTask.execute();
+        });
     }
 
     void setListener(@NonNull Listener listener, @Nullable LatLngBounds latLngBounds) {

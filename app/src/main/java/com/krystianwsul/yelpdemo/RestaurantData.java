@@ -22,6 +22,7 @@ class RestaurantData {
     String mAddress;
     String mCategories;
     int mReviewCount;
+    String mId;
 
     RestaurantData() {
 
@@ -37,6 +38,7 @@ class RestaurantData {
                 .map(Category::getTitle)
                 .collect(Collectors.joining("\n"));
         mReviewCount = business.getReviewCount();
+        mId = business.getId();
     }
 
     static String getAddress(@NonNull Business business) {

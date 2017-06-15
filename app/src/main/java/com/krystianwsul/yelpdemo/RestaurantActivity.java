@@ -3,7 +3,6 @@ package com.krystianwsul.yelpdemo;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.hardware.fingerprint.FingerprintManagerCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,12 +12,24 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.bumptech.glide.Glide;
+import com.yelp.fusion.client.connection.YelpFusionApi;
 import com.yelp.fusion.client.models.Business;
+import com.yelp.fusion.client.models.Review;
+import com.yelp.fusion.client.models.Reviews;
 
 import junit.framework.Assert;
 
 import org.parceler.Parcels;
+
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RestaurantActivity extends AppCompatActivity {
     private static final String RESTAURANT_DATA_KEY = "restaurantData";
@@ -66,6 +77,20 @@ public class RestaurantActivity extends AppCompatActivity {
         TextView restaurantCategories = (TextView) findViewById(R.id.restaurant_categories);
         restaurantCategories.setText(restaurantData.mCategories);
 
+        TextView restaurantReviews = (TextView) findViewById(R.id.restaurant_reviews);
 
+        YelpViewModel.sInstance.mApiObservable.subscribe(yelpFusionApi -> yelpFusionApi.getBusinessReviews(restaurantData.mId, "en_US").enqueue(new Callback<Reviews>() {
+            @Override
+            public void onResponse(Call<Reviews> call, Response<Reviews> response) {
+                restaurantReviews.setText(Stream.of(response.body().getReviews())
+                        .map(Review::getText)
+                        .collect(Collectors.joining("\n\n")));
+            }
+
+            @Override
+            public void onFailure(Call<Reviews> call, Throwable t) {
+                Log.e("RestaurantActivity", "getBusinessReviews.onFailure ", t);
+            }
+        }));
     }
 }
