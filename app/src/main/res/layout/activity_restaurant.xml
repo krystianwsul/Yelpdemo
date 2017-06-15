@@ -63,20 +63,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    tools:ignore="UseCompoundDrawables">
 
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="16dp"
-                        android:src="@drawable/ic_phone_black_24dp"/>
+                        android:src="@drawable/ic_phone_black_24dp"
+                        tools:ignore="ContentDescription,RtlHardcoded"/>
 
                     <TextView
                         android:id="@+id/restaurant_phone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="32dp"
-                        android:layout_marginRight="16dp"/>
+                        android:layout_marginRight="16dp"
+                        tools:ignore="RtlHardcoded"/>
 
                 </LinearLayout>
 
@@ -98,14 +101,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginLeft="72dp"
-                    android:layout_marginRight="16dp"
                     android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:src="@drawable/ic_stars_black_24dp"
+                        tools:ignore="ContentDescription,RtlHardcoded"/>
 
                     <TextView
                         android:id="@+id/restaurant_rating_number"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="32dp"
+                        tools:ignore="RtlHardcoded"/>
 
                     <RatingBar
                         android:id="@+id/restaurant_rating_stars"
@@ -124,7 +134,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=" reviews"/>
+                        android:text=" reviews"
+                        android:layout_marginRight="16dp"
+                        tools:ignore="HardcodedText,RtlHardcoded"/>
 
                 </LinearLayout>
 
@@ -146,20 +158,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    tools:ignore="UseCompoundDrawables">
 
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="16dp"
-                        android:src="@drawable/ic_map_black_24dp"/>
+                        android:src="@drawable/ic_map_black_24dp"
+                        tools:ignore="ContentDescription,RtlHardcoded"/>
 
                     <TextView
                         android:id="@+id/restaurant_address"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="32dp"
-                        android:layout_marginRight="16dp"/>
+                        android:layout_marginRight="16dp"
+                        tools:ignore="RtlHardcoded"/>
 
                 </LinearLayout>
 
@@ -181,20 +196,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    tools:ignore="UseCompoundDrawables">
 
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="16dp"
-                        android:src="@drawable/ic_bookmark_border_black_24dp"/>
+                        android:src="@drawable/ic_label_outline_black_24dp"
+                        tools:ignore="ContentDescription,RtlHardcoded"/>
 
                     <TextView
                         android:id="@+id/restaurant_categories"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="32dp"
-                        android:layout_marginRight="16dp"/>
+                        android:layout_marginRight="16dp"
+                        tools:ignore="RtlHardcoded"/>
 
                 </LinearLayout>
 
