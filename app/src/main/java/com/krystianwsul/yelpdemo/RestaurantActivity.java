@@ -3,6 +3,7 @@ package com.krystianwsul.yelpdemo;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -47,12 +48,15 @@ public class RestaurantActivity extends AppCompatActivity {
         return intent;
     }
 
+    private Disposable mListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant);
 
-        RestaurantData restaurantData = Parcels.unwrap(getIntent().getParcelableExtra(RESTAURANT_DATA_KEY));
+        RestaurantData restaurantData = Parcels.unwrap(getIntent()
+                .getParcelableExtra(RESTAURANT_DATA_KEY));
         Assert.assertTrue(restaurantData != null);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.restaurant_toolbar);
@@ -88,21 +92,28 @@ public class RestaurantActivity extends AppCompatActivity {
 
         LinearLayout restaurantReviews = (LinearLayout) findViewById(R.id.restaurant_reviews);
 
-        // todo lifecycle
-        ReviewSource.sInstance.getReview(restaurantData.mId)
+        mListener = ReviewSource.sInstance.getReview(restaurantData.mId)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(reviews -> {
-            for (Review review : reviews) {
-                View view = View.inflate(RestaurantActivity.this, R.layout.row_review, null);
-                Assert.assertTrue(view != null);
+                    for (Review review : reviews) {
+                        View view = View.inflate(RestaurantActivity.this,
+                                R.layout.row_review, null);
+                        Assert.assertTrue(view != null);
 
-                TextView reviewBody = (TextView) view.findViewById(R.id.review_body);
-                Assert.assertTrue(reviewBody != null);
+                        TextView reviewBody = (TextView) view.findViewById(R.id.review_body);
+                        Assert.assertTrue(reviewBody != null);
 
-                reviewBody.setText(review.getText());
+                        reviewBody.setText(review.getText());
 
-                restaurantReviews.addView(view);
-            }
-        });
+                        restaurantReviews.addView(view);
+                    }
+                });
+    }
+
+    @Override
+    protected void onDestroy() {
+        mListener.dispose();
+
+        super.onDestroy();
     }
 }

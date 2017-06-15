@@ -36,14 +36,11 @@ class ReviewSource {
     Single<List<Review>> getReview(@NonNull String businessId) {
         if (!mReviews.containsKey(businessId))
             mReviews.put(businessId, YelpApiSingleton.sInstance.mSingle
-                    .map(yelpFusionApi -> {
-                        Log.e("asdf", "querying " + businessId);
-
-                        return (List<Review>) yelpFusionApi.getBusinessReviews(businessId, "en_US")
+                    .map(yelpFusionApi -> (List<Review>) yelpFusionApi
+                            .getBusinessReviews(businessId, "en_US")
                             .execute()
                             .body()
-                            .getReviews();
-                    })
+                            .getReviews())
                     .cache());
 
         return mReviews.get(businessId);
