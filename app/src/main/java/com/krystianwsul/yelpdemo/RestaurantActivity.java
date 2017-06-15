@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -86,11 +87,23 @@ public class RestaurantActivity extends AppCompatActivity {
                     for (Review review : reviews) {
                         View view = View.inflate(RestaurantActivity.this,
                                 R.layout.row_review, null);
-                        Assert.assertTrue(view != null);
+
+                        ImageView reviewImage = (ImageView) view.findViewById(R.id.review_image);
+                        if (!TextUtils.isEmpty(review.getUser().getImageUrl()))
+                            Glide.with(RestaurantActivity.this)
+                                    .load(review.getUser().getImageUrl())
+                                    .into(reviewImage);
+
+                        TextView reviewName = (TextView) view.findViewById(R.id.review_name);
+                        reviewName.setText(review.getUser().getName());
+
+                        RatingBar reviewStars = (RatingBar) view.findViewById(R.id.review_stars);
+                        reviewStars.setRating(review.getRating());
+
+                        TextView reviewDate = (TextView) view.findViewById(R.id.review_date);
+                        reviewDate.setText(review.getTimeCreated());
 
                         TextView reviewBody = (TextView) view.findViewById(R.id.review_body);
-                        Assert.assertTrue(reviewBody != null);
-
                         reviewBody.setText(review.getText());
 
                         restaurantReviews.addView(view);
