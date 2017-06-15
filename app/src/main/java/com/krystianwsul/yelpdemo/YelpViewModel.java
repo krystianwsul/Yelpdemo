@@ -3,10 +3,8 @@ package com.krystianwsul.yelpdemo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.yelp.fusion.client.connection.YelpFusionApi;
 import com.yelp.fusion.client.models.Business;
 import com.yelp.fusion.client.models.SearchResponse;
 
@@ -39,20 +37,15 @@ class YelpViewModel {
     }
 
     void setListener(@NonNull Listener listener) {
-        Assert.assertTrue(mListener == null); // todo remove assertions
+        Assert.assertTrue(mListener == null);
 
         mListener = listener;
 
-        if (mBusinesses != null) {
-            Log.e("asdf", "onPostExecute setListener returning cached");
-
+        if (mBusinesses != null)
             listener.onResponse(mBusinesses);
-        }
     }
 
     void clearListener() {
-        Log.e("asdf", "clearListener");
-
         mListener = null;
     }
 
@@ -61,18 +54,11 @@ class YelpViewModel {
 
         mLocation = latLngBounds;
 
-        if (!mExecutingRequest) {
-            Log.e("asdf", "enqueueRequest getting request");
-
+        if (!mExecutingRequest)
             getRequest();
-        } else {
-            Log.e("asdf", "enqueueRequest already executing, setting pending");
-        }
     }
 
     private void getRequest() {
-        Log.e("asdf", "enqueueRequest getRequest");
-
         Assert.assertTrue(!mExecutingRequest);
         Assert.assertTrue(mLocation != null);
 
@@ -94,8 +80,6 @@ class YelpViewModel {
                     if (longitude > 180)
                         longitude = 360 - longitude;
 
-                    Log.e("asdf", "center: " + center.first + ", " + longitude);
-
                     double radius = distance(latLngBounds.southwest.latitude, center.first,
                             latLngBounds.southwest.longitude, center.second);
 
@@ -109,7 +93,8 @@ class YelpViewModel {
 
                     yelpFusionApi.getBusinessSearch(params).enqueue(new Callback<SearchResponse>() {
                         @Override
-                        public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
+                        public void onResponse(Call<SearchResponse> call,
+                                               Response<SearchResponse> response) {
                             if (mBusinesses == null)
                                 mBusinesses = new HashMap<>();
 
@@ -119,15 +104,11 @@ class YelpViewModel {
                             if (mListener != null)
                                 mListener.onResponse(mBusinesses);
 
-                            Log.e("asdf", "response: " + response.body());
-
                             onFinished(latLngBounds);
                         }
 
                         @Override
                         public void onFailure(Call<SearchResponse> call, Throwable t) {
-                            Log.e("asdf", "onFailure", t);
-
                             onFinished(latLngBounds);
                         }
                     });
@@ -137,16 +118,12 @@ class YelpViewModel {
     private void onFinished(@NonNull LatLngBounds latLngBounds) {
         mExecutingRequest = false;
 
-        if (!latLngBounds.equals(mLocation)) {
-            Log.e("asdf", "onFinished mLocation not null, restarting");
-
+        if (!latLngBounds.equals(mLocation))
             getRequest();
-        } else {
-            Log.e("asdf", "onFinished mLocation null, finished");
-        }
     }
 
-    private static Pair<Double, Double> midPoint(double lat1, double lng1, double lat2, double lng2) {
+    private static Pair<Double, Double> midPoint(double lat1, double lng1,
+                                                 double lat2, double lng2) {
         double dLon = Math.toRadians(lng2 - lng1);
 
         //convert to radians
