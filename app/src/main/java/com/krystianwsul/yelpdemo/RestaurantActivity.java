@@ -65,11 +65,14 @@ public class RestaurantActivity extends AppCompatActivity {
         TextView restaurantPhone = (TextView) findViewById(R.id.restaurant_phone);
         restaurantPhone.setText(restaurantData.mPhone);
 
-        RatingBar restaurantRating = (RatingBar) findViewById(R.id.restaurant_rating);
-        restaurantRating.setRating(restaurantData.mRating);
+        TextView restaurantRatingNumber = (TextView) findViewById(R.id.restaurant_rating_number);
+        restaurantRatingNumber.setText(String.valueOf(restaurantData.mRating));
+
+        RatingBar restaurantRatingStars = (RatingBar) findViewById(R.id.restaurant_rating_stars);
+        restaurantRatingStars.setRating(restaurantData.mRating);
 
         TextView restaurantReviewCount = (TextView) findViewById(R.id.restaurant_review_count);
-        restaurantReviewCount.setText("(" + restaurantData.mReviewCount + ")");
+        restaurantReviewCount.setText(String.valueOf(restaurantData.mReviewCount));
 
         TextView restaurantAddress = (TextView) findViewById(R.id.restaurant_address);
         restaurantAddress.setText(restaurantData.mAddress);
