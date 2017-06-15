@@ -1,18 +1,9 @@
 package com.krystianwsul.yelpdemo;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.support.annotation.ArrayRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.util.Pair;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.TextureView;
+import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -27,20 +18,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.yelp.fusion.client.connection.YelpFusionApi;
-import com.yelp.fusion.client.connection.YelpFusionApiFactory;
 import com.yelp.fusion.client.models.Business;
-import com.yelp.fusion.client.models.SearchResponse;
 
 import junit.framework.Assert;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, YelpViewModel.Listener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
+        YelpViewModel.Listener {
 
     private GoogleMap mMap;
 
@@ -94,7 +81,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        mMap.setOnInfoWindowClickListener(marker -> startActivity(RestaurantActivity.newIntent(MapsActivity.this, mBusinesses.get(marker.getTitle()))));
+        mMap.setOnInfoWindowClickListener(marker -> startActivity(RestaurantActivity
+                .newIntent(MapsActivity.this, mBusinesses.get(marker.getTitle()))));
 
         mMap.setOnCameraMoveListener(this::updateMap);
         mMap.setOnCameraIdleListener(this::updateMap);
@@ -123,12 +111,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
 
-        Log.e("asdf", newBusinesses.size() + " new results");
-
         mBusinesses.putAll(businesses);
 
         for (Business business : newBusinesses) {
-            LatLng latLng = new LatLng(business.getCoordinates().getLatitude(), business.getCoordinates().getLongitude());
+            LatLng latLng = new LatLng(business.getCoordinates().getLatitude(),
+                    business.getCoordinates().getLongitude());
             mMap.addMarker(new MarkerOptions()
                     .position(latLng)
                     .title(business.getId()));
