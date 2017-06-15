@@ -57,7 +57,15 @@ public class RestaurantActivity extends AppCompatActivity {
         RatingBar restaurantRating = (RatingBar) findViewById(R.id.restaurant_rating);
         restaurantRating.setRating(restaurantData.mRating);
 
+        TextView restaurantReviewCount = (TextView) findViewById(R.id.restaurant_review_count);
+        restaurantReviewCount.setText("(" + restaurantData.mReviewCount + ")");
+
         TextView restaurantAddress = (TextView) findViewById(R.id.restaurant_address);
         restaurantAddress.setText(restaurantData.mAddress);
+
+        TextView restaurantCategories = (TextView) findViewById(R.id.restaurant_categories);
+        restaurantCategories.setText(restaurantData.mCategories);
+
+
     }
 }

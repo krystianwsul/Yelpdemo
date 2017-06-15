@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.yelp.fusion.client.models.Business;
+import com.yelp.fusion.client.models.Category;
 
 import org.parceler.Parcel;
 
@@ -19,6 +20,8 @@ class RestaurantData {
     String mPhone;
     float mRating;
     String mAddress;
+    String mCategories;
+    int mReviewCount;
 
     RestaurantData() {
 
@@ -27,9 +30,13 @@ class RestaurantData {
     RestaurantData(@NonNull Business business) {
         mName = business.getName();
         mImageUrl = business.getImageUrl();
-        mPhone = business.getPhone();
+        mPhone = business.getDisplayPhone();
         mRating = (float) business.getRating();
         mAddress = getAddress(business);
+        mCategories = Stream.of(business.getCategories())
+                .map(Category::getTitle)
+                .collect(Collectors.joining("\n"));
+        mReviewCount = business.getReviewCount();
     }
 
     static String getAddress(@NonNull Business business) {
