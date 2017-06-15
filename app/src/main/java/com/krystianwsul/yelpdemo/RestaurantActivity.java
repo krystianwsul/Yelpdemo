@@ -8,7 +8,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -80,14 +82,23 @@ public class RestaurantActivity extends AppCompatActivity {
         TextView restaurantCategories = (TextView) findViewById(R.id.restaurant_categories);
         restaurantCategories.setText(restaurantData.mCategories);
 
-        TextView restaurantReviews = (TextView) findViewById(R.id.restaurant_reviews);
+        LinearLayout restaurantReviews = (LinearLayout) findViewById(R.id.restaurant_reviews);
 
+        //todo context leak
         YelpApiSingleton.sInstance.mSingle.subscribe(yelpFusionApi -> yelpFusionApi.getBusinessReviews(restaurantData.mId, "en_US").enqueue(new Callback<Reviews>() {
             @Override
             public void onResponse(Call<Reviews> call, Response<Reviews> response) {
-                restaurantReviews.setText(Stream.of(response.body().getReviews())
-                        .map(Review::getText)
-                        .collect(Collectors.joining("\n\n")));
+                for (Review review : response.body().getReviews()) {
+                    View view = View.inflate(RestaurantActivity.this, R.layout.row_review, null);
+                    Assert.assertTrue(view != null);
+
+                    TextView reviewBody = (TextView) view.findViewById(R.id.review_body);
+                    Assert.assertTrue(reviewBody != null);
+
+                    reviewBody.setText(review.getText());
+
+                    restaurantReviews.addView(view);
+                }
             }
 
             @Override
