@@ -103,19 +103,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LatLng empireStateBuilding = new LatLng(40.748817, -73.985428);
             mMap.moveCamera(CameraUpdateFactory.newLatLng(empireStateBuilding));
             mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
-
-            Log.e("asdf", "initial bounds " + mMap.getProjection()
-                    .getVisibleRegion()
-                    .latLngBounds);
-
-            YelpViewModel.sInstance.setListener(this, null);
-        } else {
-            LatLngBounds latLngBounds = mMap.getProjection()
-                    .getVisibleRegion()
-                    .latLngBounds;
-
-            YelpViewModel.sInstance.setListener(this, latLngBounds);
         }
+
+        YelpViewModel.sInstance.setListener(this);
     }
 
     private void updateMap() {

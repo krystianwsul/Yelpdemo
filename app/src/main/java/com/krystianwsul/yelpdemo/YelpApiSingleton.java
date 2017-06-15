@@ -32,6 +32,6 @@ class YelpApiSingleton {
                     .observeOn(AndroidSchedulers.mainThread());
 
     private YelpApiSingleton() {
-
+        mSingle.subscribe(yelpFusionApi -> {});
     }
 }
