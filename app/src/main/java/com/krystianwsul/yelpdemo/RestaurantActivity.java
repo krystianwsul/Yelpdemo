@@ -20,6 +20,10 @@ import com.yelp.fusion.client.models.Review;
 
 import junit.framework.Assert;
 
+import org.joda.time.LocalDateTime;
+import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.parceler.Parcels;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -27,6 +31,9 @@ import io.reactivex.disposables.Disposable;
 
 public class RestaurantActivity extends AppCompatActivity {
     private static final String RESTAURANT_DATA_KEY = "restaurantData";
+
+    private static final DateTimeFormatter sDateTimeFormatter
+            = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     @NonNull
     static Intent newIntent(@NonNull Context context, @NonNull Business business) {
@@ -101,7 +108,7 @@ public class RestaurantActivity extends AppCompatActivity {
                         reviewStars.setRating(review.getRating());
 
                         TextView reviewDate = (TextView) view.findViewById(R.id.review_date);
-                        reviewDate.setText(review.getTimeCreated());
+                        reviewDate.setText(formatDate(review.getTimeCreated()));
 
                         TextView reviewBody = (TextView) view.findViewById(R.id.review_body);
                         reviewBody.setText(review.getText());
@@ -116,5 +123,30 @@ public class RestaurantActivity extends AppCompatActivity {
         mListener.dispose();
 
         super.onDestroy();
+    }
+
+    @NonNull
+    private String formatDate(@NonNull String date) {
+        LocalDateTime then = sDateTimeFormatter.parseLocalDateTime(date);
+        LocalDateTime now = LocalDateTime.now();
+
+        Period period = new Period(then, now);
+
+        if (period.getYears() > 0)
+            return period.getYears() + " years ago";
+
+        if (period.getMonths() > 0)
+            return period.getMonths() + " months ago";
+
+        if (period.getDays() > 0)
+            return period.getDays() + " days ago";
+
+        if (period.getHours() > 0)
+            return period.getHours() + " hours ago";
+
+        if (period.getMinutes() > 0)
+            return period.getMinutes() + " minutes ago";
+
+        return "now";
     }
 }
