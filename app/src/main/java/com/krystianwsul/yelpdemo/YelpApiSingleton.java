@@ -1,7 +1,5 @@
 package com.krystianwsul.yelpdemo;
 
-import android.util.Log;
-
 import com.yelp.fusion.client.connection.YelpFusionApi;
 import com.yelp.fusion.client.connection.YelpFusionApiFactory;
 
@@ -9,7 +7,6 @@ import java.io.IOException;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 class YelpApiSingleton {
