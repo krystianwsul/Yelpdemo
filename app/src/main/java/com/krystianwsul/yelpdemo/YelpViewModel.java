@@ -52,31 +52,9 @@ class YelpViewModel {
 
     private boolean mExecutingRequest = false;
 
-    private boolean mAlreadyInitialized = false;
-    final Single<YelpFusionApi> mApiObservable =
-            Observable.fromCallable(() -> {
-                Log.e("asdf", "creating yelpFusionApi");
-
-                Assert.assertTrue(!mAlreadyInitialized);
-
-                YelpFusionApiFactory yelpFusionApiFactory = new YelpFusionApiFactory();
-
-                try {
-                    YelpFusionApi yelpFusionApi = yelpFusionApiFactory.createAPI("Smym4waYVw0m-nFnGJpQ3g", "5KfDI2E0e5o0fvpF2NjsaypsS1cyaSMrJPQxArkYtMyQdOkqH5KExBxLshPuTVvm");
-                    mAlreadyInitialized = true;
-                    return yelpFusionApi;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            })
-                    .cache()
-                    .singleOrError()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread());
-
     private YelpViewModel() {
         //noinspection NullableProblems
-        mApiObservable.subscribe(yelpFusionApi -> {
+        YelpApiSingleton.sInstance.mSingle.subscribe(yelpFusionApi -> {
             Assert.assertTrue(!mExecutingRequest);
             Assert.assertTrue(mBusinesses == null);
             Assert.assertTrue(mYelpFusionApi == null);

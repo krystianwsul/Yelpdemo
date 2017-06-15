@@ -79,7 +79,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
         TextView restaurantReviews = (TextView) findViewById(R.id.restaurant_reviews);
 
-        YelpViewModel.sInstance.mApiObservable.subscribe(yelpFusionApi -> yelpFusionApi.getBusinessReviews(restaurantData.mId, "en_US").enqueue(new Callback<Reviews>() {
+        YelpApiSingleton.sInstance.mSingle.subscribe(yelpFusionApi -> yelpFusionApi.getBusinessReviews(restaurantData.mId, "en_US").enqueue(new Callback<Reviews>() {
             @Override
             public void onResponse(Call<Reviews> call, Response<Reviews> response) {
                 restaurantReviews.setText(Stream.of(response.body().getReviews())
