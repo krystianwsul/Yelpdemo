@@ -28,8 +28,7 @@ class YelpApiSingleton {
             })
                     .cache()
                     .singleOrError()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread());
+                    .subscribeOn(Schedulers.io());
 
     private YelpApiSingleton() {
         mSingle.subscribe(yelpFusionApi -> {});

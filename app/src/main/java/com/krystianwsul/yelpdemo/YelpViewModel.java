@@ -15,6 +15,7 @@ import junit.framework.Assert;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -77,59 +78,60 @@ class YelpViewModel {
 
         mExecutingRequest = true;
 
-        YelpApiSingleton.sInstance.mSingle.subscribe(yelpFusionApi -> {
-            Assert.assertTrue(mExecutingRequest);
-            Assert.assertTrue(mLocation != null);
+        YelpApiSingleton.sInstance.mSingle.observeOn(AndroidSchedulers.mainThread())
+                .subscribe(yelpFusionApi -> {
+                    Assert.assertTrue(mExecutingRequest);
+                    Assert.assertTrue(mLocation != null);
 
-            LatLngBounds latLngBounds = mLocation;
+                    LatLngBounds latLngBounds = mLocation;
 
-            Pair<Double, Double> center = midPoint(latLngBounds.southwest.latitude,
-                    latLngBounds.southwest.longitude,
-                    latLngBounds.northeast.latitude,
-                    latLngBounds.northeast.longitude);
+                    Pair<Double, Double> center = midPoint(latLngBounds.southwest.latitude,
+                            latLngBounds.southwest.longitude,
+                            latLngBounds.northeast.latitude,
+                            latLngBounds.northeast.longitude);
 
-            Double longitude = center.second;
-            if (longitude > 180)
-                longitude = 360 - longitude;
+                    Double longitude = center.second;
+                    if (longitude > 180)
+                        longitude = 360 - longitude;
 
-            Log.e("asdf", "center: " + center.first + ", " + longitude);
+                    Log.e("asdf", "center: " + center.first + ", " + longitude);
 
-            double radius = distance(latLngBounds.southwest.latitude, center.first,
-                    latLngBounds.southwest.longitude, center.second);
+                    double radius = distance(latLngBounds.southwest.latitude, center.first,
+                            latLngBounds.southwest.longitude, center.second);
 
-            radius = Math.min(radius, 40000);
+                    radius = Math.min(radius, 40000);
 
-            Map<String, String> params = new HashMap<>();
-            params.put("categories", "restaurants");
-            params.put("latitude", center.first.toString());
-            params.put("longitude", longitude.toString());
-            params.put("radius", Long.valueOf(Math.round(radius)).toString());
+                    Map<String, String> params = new HashMap<>();
+                    params.put("categories", "restaurants");
+                    params.put("latitude", center.first.toString());
+                    params.put("longitude", longitude.toString());
+                    params.put("radius", Long.valueOf(Math.round(radius)).toString());
 
-            yelpFusionApi.getBusinessSearch(params).enqueue(new Callback<SearchResponse>() {
-                @Override
-                public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
-                    if (mBusinesses == null)
-                        mBusinesses = new HashMap<>();
+                    yelpFusionApi.getBusinessSearch(params).enqueue(new Callback<SearchResponse>() {
+                        @Override
+                        public void onResponse(Call<SearchResponse> call, Response<SearchResponse> response) {
+                            if (mBusinesses == null)
+                                mBusinesses = new HashMap<>();
 
-                    for (Business business : response.body().getBusinesses())
-                        mBusinesses.put(business.getId(), business);
+                            for (Business business : response.body().getBusinesses())
+                                mBusinesses.put(business.getId(), business);
 
-                    if (mListener != null)
-                        mListener.onResponse(mBusinesses);
+                            if (mListener != null)
+                                mListener.onResponse(mBusinesses);
 
-                    Log.e("asdf", "response: " + response.body());
+                            Log.e("asdf", "response: " + response.body());
 
-                    onFinished(latLngBounds);
-                }
+                            onFinished(latLngBounds);
+                        }
 
-                @Override
-                public void onFailure(Call<SearchResponse> call, Throwable t) {
-                    Log.e("asdf", "onFailure", t);
+                        @Override
+                        public void onFailure(Call<SearchResponse> call, Throwable t) {
+                            Log.e("asdf", "onFailure", t);
 
-                    onFinished(latLngBounds);
-                }
-            });
-        });
+                            onFinished(latLngBounds);
+                        }
+                    });
+                });
     }
 
     private void onFinished(@NonNull LatLngBounds latLngBounds) {

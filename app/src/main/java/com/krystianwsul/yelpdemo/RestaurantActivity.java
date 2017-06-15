@@ -26,7 +26,11 @@ import junit.framework.Assert;
 
 import org.parceler.Parcels;
 
+import java.util.List;
+
+import io.reactivex.Observable;
 import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import retrofit2.Call;
@@ -84,27 +88,21 @@ public class RestaurantActivity extends AppCompatActivity {
 
         LinearLayout restaurantReviews = (LinearLayout) findViewById(R.id.restaurant_reviews);
 
-        //todo context leak
-        YelpApiSingleton.sInstance.mSingle.subscribe(yelpFusionApi -> yelpFusionApi.getBusinessReviews(restaurantData.mId, "en_US").enqueue(new Callback<Reviews>() {
-            @Override
-            public void onResponse(Call<Reviews> call, Response<Reviews> response) {
-                for (Review review : response.body().getReviews()) {
-                    View view = View.inflate(RestaurantActivity.this, R.layout.row_review, null);
-                    Assert.assertTrue(view != null);
+        // todo lifecycle
+        ReviewSource.sInstance.getReview(restaurantData.mId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(reviews -> {
+            for (Review review : reviews) {
+                View view = View.inflate(RestaurantActivity.this, R.layout.row_review, null);
+                Assert.assertTrue(view != null);
 
-                    TextView reviewBody = (TextView) view.findViewById(R.id.review_body);
-                    Assert.assertTrue(reviewBody != null);
+                TextView reviewBody = (TextView) view.findViewById(R.id.review_body);
+                Assert.assertTrue(reviewBody != null);
 
-                    reviewBody.setText(review.getText());
+                reviewBody.setText(review.getText());
 
-                    restaurantReviews.addView(view);
-                }
+                restaurantReviews.addView(view);
             }
-
-            @Override
-            public void onFailure(Call<Reviews> call, Throwable t) {
-                Log.e("RestaurantActivity", "getBusinessReviews.onFailure ", t);
-            }
-        }));
+        });
     }
 }
